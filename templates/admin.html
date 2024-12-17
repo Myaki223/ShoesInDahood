@@ -1,0 +1,239 @@
+
+{% extends 'partials/base-admin.html' %}
+{% load static %}
+
+{% block content %}  
+       <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column" >
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                    <div class="pt-5 mb-4">
+                        <h1 class="h3 mb-0 text-gray-800 text-center">My Dashboard</h1>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+
+
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        
+
+                        <!-- Pending Requests Card Example -->
+
+                    </div>
+
+
+                <div class="container-fluid red-text">
+
+                    <!-- DataTales Example -->
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 text-warning text-center red-text">Users</h6>
+                        </div>
+                        <div class="text-warning red-text">
+                            <div class="">
+                                <table class="table table-striped text-warning red-text" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone Number</th>
+                                            <th>Location</th>
+                                            <th>Total amount spent</th>
+                                        </tr>
+                                    </thead>
+                               
+                                    <tbody>
+                                        
+                                        {% for user in users %}
+                                        {% if not user.is_superuser %}
+                                        <tr>
+                                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ user.customer.phone_number }}</td>
+                                            <td>{{ user.customer.location }}</td>
+                                            <th>₱{{ user.customer.total_spent }}</th>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-2 col-md-6 mb-4 text-center">
+                        <div class=" h-100 py-2">
+                            <div class="">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2 red-text">
+                                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1 red-text ">
+                                            Overall earnings this time:</div>
+                                            <div class="h5 mb-0 text-lg text-warning red-text">₱{{ total_spent }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-2 col-md-6 mb-4 text-center">
+                        <div class=" h-100 py-2">
+                            <div class="">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1 red-text">
+                                            Overall users this time:</div>
+                                            <div class="h5 mb-0 text-lg text-warning red-text">{{ total_users }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                
+
+                {% comment %} <div class="container-fluid">
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Users</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Order Number</th>
+                                            <th>Product name</th>
+                                            <th>Buyer</th>
+                                            <th>Location</th>
+                                            <th>Total amount</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        
+                                        {% for shopping_cart in shopping_carts %}
+                                        <tr>
+                                            <td>{{ shopping_cart.id }}</td>
+                                            <td>{{ shopping_cart.cart_item.name }}</td>
+                                            <td>{{ shopping_cart.user.first_name }} {{ shopping_cart.user.last_name }}</td>
+                                            <td>{{ shopping_cart.user.location }}</td>
+                                            <td>₱{{ shopping_cart.cart_item_total }}</td>
+                                            <td>
+                                                <select class="form-control" id="status" name="status" value="{{ shopping_cart.cart_status }}" style="width: 150px;" disabled>
+                                                    <option value="1" {% if shopping_cart.cart_status == 1 %}selected{% endif %}>Pending</option>
+                                                    <option value="2" {% if shopping_cart.cart_status == 2 %}selected{% endif %}>On delivery</option>
+                                                    <option value="3" {% if shopping_cart.cart_status == 3 %}selected{% endif %}>Complete</option>
+                                                  </select>
+                                            </td>
+                                            {% if shopping_cart.cart_status == 3 %}
+                                            <td>Delivered</td>
+                                            {% elif shopping_cart.cart_status == 1 %}
+                                            <td>Waiting for confirmation</td>
+                                            {% else %}
+                                            <td><a href="{% url 'update_cart_status' shopping_cart_id=shopping_cart.id %}"><button class="btn-success">Product delivered</button></a></td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> {% endcomment %}
+
+                <!-- Begin Page Content -->
+                {% comment %} <div class="container-fluid">
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Users</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone Number</th>
+                                            <th>Location</th>
+                                            <th>Total amount spent</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone Number</th>
+                                            <th>Location</th>
+                                            <th>Total amount spent</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        
+                                        {% for user in users %}
+                                        {% if not user.is_superuser %}
+                                        <tr>
+                                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ user.customer.phone_number }}</td>
+                                            <td>{{ user.customer.location }}</td>
+                                            <th>₱{{ user.customer.total_spent }}</th>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> {% endcomment %}
+                <!-- /.container-fluid -->
+                                <!-- Begin Page Content -->
+                                
+                                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+                
+
+                  
+            <!-- Footer -->
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Logout Modal-->
+    {% endblock %}

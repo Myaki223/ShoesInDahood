@@ -1,0 +1,107 @@
+{% extends 'partials/base-profile.html' %}
+{% load static %}
+
+
+{% block content %}
+
+
+<div class="container-img" style="padding-top: 50px;">
+    <h1>{{ user.first_name }}'s Cart</h1>
+    </div>
+    
+    <div class="container">
+        <!-- Active Orders -->
+        <h2>Active Orders</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm m-0">
+                <thead style="background-color: #dc3545; color: white;">
+                    <tr class="text-center">
+                        <th>Product Image</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in shopping_cart_items %}
+                    <tr class="text-center align-middle">
+                        <td><img src="{{ item.cart_item.image.url }}" style="max-width: 100px; max-height: 100px;"></td>
+                        <td>{{ item.cart_item.name }}</td>
+                        <td>{{ item.cart_item_quantity }}</td>
+                        <td>₱{{ item.cart_item.price }}</td>
+                        <td>₱{{ item.cart_item_total }}</td>
+                        <td>
+                            {% if item.cart_status == 3 %}
+                                <a href="#" class="text-decoration-none" style="color: rgb(25, 0, 255);">Completed</a>
+                            {% else %}
+                                <a href="#" class="text-decoration-none" style="color: rgb(0, 255, 42);" data-bs-toggle="modal" data-bs-target="#buyModal{{ item.cart_item.id }}">Purchase</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Completed Orders -->
+        <h2>Completed Orders</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm m-0">
+                <thead style="background-color: #28a745; color: white;">
+                    <tr class="text-center">
+                        <th>Order ID</th>
+                        <th>Total Amount</th>
+                        <th>Payment Method</th>
+                        <th>Order Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in completed_orders %}
+                    <tr class="text-center align-middle">
+                        <td>{{ order.order_id }}</td>
+                        <td>₱{{ order.total_amount }}</td>
+                        <td>{{ order.payment_method }}</td>
+                        <td>{{ order.order_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="#buyModal{{ item.cart_item.id }}" tabindex="-1" aria-labelledby="buyModalLabel{{ item.cart_item.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <h4>Order Details</h4>
+                    <p>Order ID: {{ item.cart_item.id }}</p>
+                    <p>Product: {{ item.cart_item.name }}</p>
+                    <p>Quantity: {{ item.cart_item_quantity }}</p>
+                    <p>Price per Item: ₱{{ item.cart_item.price }}</p>
+                    <p>Total Amount: ₱{{ item.cart_item_total }}</p>
+                    <p>Payment Method: PayPal</p>
+                </div>
+                <div class="modal-footer">
+                    {% if item.id %}
+                        <a href="{% url 'complete_order' shopping_cart_id=item.id %}" class="btn btn-danger">Confirm Purchase</a>
+                    {% else %}
+                        <p>Invalid item ID.</p>
+                    {% endif %}
+                </div>
+    
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}

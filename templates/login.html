@@ -1,0 +1,43 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<body>
+  <br><br><br>
+  <form method="POST" class="login-form">
+    {% csrf_token %}
+    <img src="{% static 'image/small-logo.png' %}" alt="">
+    <h1>Login</h1>
+    <h1>Dont have an account?<a href="{% url 'register' %}">Sign up Now</a></h1>
+    <div class="form-container">
+      <div class="container">
+        <label for="username">Username:</label>
+        <input type="text" placeholder="Enter Username" name="username" id="username" required>
+        <label for="password">Password:</label>
+        <input type="password" placeholder="Enter Password" name="password" id="password" required>
+      </div>
+      <button type="submit">Login</button>
+    </div>
+  </form>
+
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    {% if message.extra_tags == 'login_error' %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <script>
+    // Wait 5 seconds, then remove any messages
+    setTimeout(function() {
+      var messages = document.querySelector('.messages');
+      if (messages) {
+        messages.remove();
+      }
+    }, 1500);
+  </script>
+</body>
+{% endblock %}

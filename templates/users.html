@@ -1,0 +1,125 @@
+
+{% extends 'partials/base-admin.html' %}
+{% load static %}
+
+{% block content %}  
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper " class="d-flex flex-column red-text">
+
+            <!-- Main Content -->
+            <div id="content ">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid ">
+                
+
+                <div class="container-fluid pt-5">
+
+                    <!-- DataTales Example -->
+                    <div class="card mb-4">
+                        <div class="card-body red-text">
+                            <div class="text-warning red-text">
+                                <table class="table text-waring red-text" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr class="text-warning red-text">
+                                            <th>Order Number</th>
+                                            <th>Product name</th>
+                                            <th>Buyer</th>
+                                            <th>Location</th>
+                                            <th>Total amount</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="text-warning red-text">
+                                        
+                                        {% for shopping_cart in shopping_carts %}
+                                        <tr>
+                                            <td>{{ shopping_cart.id }}</td>
+                                            <td>{{ shopping_cart.cart_item.name }}</td>
+                                            <td>{{ shopping_cart.user.first_name }} {{ shopping_cart.user.last_name }}</td>
+                                            <td>{{ shopping_cart.user.location }}</td>
+                                            <td>₱{{ shopping_cart.cart_item_total }}</td>
+                                            <td>
+                                                <select class="form-control bg-warning red-text" id="status" name="status" value="{{ shopping_cart.cart_status }}" style="width: 150px;" disabled>
+                                                    <option value="1" {% if shopping_cart.cart_status == 1 %}selected{% endif %}>In Process</option>
+                                                    <option value="2" {% if shopping_cart.cart_status == 2 %}selected{% endif %}>Delivered</option>
+                                                    <option value="3" {% if shopping_cart.cart_status == 3 %}selected{% endif %}>Arrived</option>
+                                                  </select>
+                                            </td>
+                                            {% if shopping_cart.cart_status == 3 %}
+                                            <td>Arrived</td>
+                                            {% elif shopping_cart.cart_status == 1 %}
+                                            <td>In Process</td>
+                                            {% else %}
+                                            <td><a href="{% url 'update_cart_status' shopping_cart_id=shopping_cart.id %}"><button class="btn-success">Arrived</button></a></td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- DataTales Example -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="">
+                                <table class="table text-warning red-text" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone Number</th>
+                                            <th>Location</th>
+                                            <th>Total amount spent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                        {% for user in users %}
+                                        {% if not user.is_superuser %}
+                                        <tr>
+                                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ user.customer.phone_number }}</td>
+                                            <td>{{ user.customer.location }}</td>
+                                            <th>₱{{ user.customer.total_spent }}</th>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+                                <!-- Begin Page Content -->
+                                
+                                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+                
+
+                  
+            <!-- Footer -->
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+{% endblock%}
