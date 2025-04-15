@@ -131,7 +131,9 @@
           </li>
               {% else %}
                 <a href="{% url 'login'%}" class="nav-action-btn">
-                  <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                  </svg>
     
                   <span class="nav-action-text">Login / Register</span>
                 </a>
@@ -170,6 +172,7 @@
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static '../static/lib/wow/wow.min.js' %}"></script>
     <script src="{% static '../static/lib/easing/easing.min.js' %}"></script>
@@ -186,84 +189,55 @@
 
 
     <script>
-      $(document).on('click', '#add-cart', function(e){
-        e.preventDefault();
-  
-        $.ajax({
-          type: 'POST',
-          url: "{% url 'cart_add' %}",
-          data: {
-                product_id: $('#add-cart').val(),
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                action: 'post'
-          }, 
-          success: function(json){
-            //console.log(json)
-            document.getElementById('cart_quantity').
-              textContent = json.qty
-          },
-    
-          error: function(xhr, errmsg, err){
-    
-          }
-    
-        });
-    
-    
-    
-    
-      })
-    
-    
-    
-    
-    </script>
-  
-  {% if messages %}
-  <ul class="messages">
-      {% for message in messages %}
-          {% if message.extra_tags == 'adminError' %}
-              <li class="{{ message.tags }}">{{ message }}</li>
-              <style>
-                .messages {
-                    position: fixed;
-                    top: 38%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    z-index: 9999;
-                    padding: 10px;
-                    background-color: #387fd6;
-                    color: #fff;
-                    font-size: 12.5px;
-                    font-weight: bold;
-                    text-align: center;
-                    border-radius: 5px;
-                    list-style-type: none;
-                }
-            </style>
-            {% elif message.extra_tags == 'loggedOut' %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-            <style>
-              .messages {
-                  position: fixed;
-                  top: 38%;
-                  left: 50%;
-                  transform: translate(-50%, -50%);
-                  z-index: 9999;
-                  padding: 10px;
-                  background-color: #00c040;
-                  color: #fff;
-                  font-size: 12.5px;
-                  font-weight: bold;
-                  text-align: center;
-                  border-radius: 5px;
-                  list-style-type: none;
+      $(document).on('click', '.add-cart', function(e){
+          e.preventDefault();
+      
+          let productId = $(this).val();
+          let productQty = $(this).closest('.product').find('#qty-cart').val();  // Ensure correct quantity selection
+      
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'cart_add' %}",
+              data: {
+                  product_id: productId,
+                  product_qty: productQty,
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  action: 'post'
+              }, 
+              success: function(json){ 
+                  document.getElementById('cart_quantity').textContent = json.qty;
+                  
+                  // Store flag in localStorage before reload
+                  localStorage.setItem("cartSuccess", "true");
+      
+                  // Reload the page
+                  location.reload();
+              },
+              error: function(xhr, errmsg, err){
+                  console.log("Error adding to cart:", errmsg);
               }
-          </style>
-          {% endif %}
-      {% endfor %}
-  </ul>
-{% endif %}
+          });
+      });
+      
+      // Show SweetAlert2 after page reload (if flag exists)
+      document.addEventListener("DOMContentLoaded", function () {
+          if (localStorage.getItem("cartSuccess")) {
+              Swal.fire({
+                  title: "Added to Cart!",
+                  text: "Your item has been successfully added.",
+                  icon: "success",
+                  timer: 2000,
+                  showConfirmButton: false
+              });
+      
+              // Remove flag after displaying the alert
+              localStorage.removeItem("cartSuccess");
+          }
+      });
+      </script>
+
+    
+  
 
 </body>
 

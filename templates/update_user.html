@@ -1,0 +1,49 @@
+{% extends 'partials/base-profile.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container my-5">
+  <div class="main-block">
+  <br><br><br>
+    
+    <h1>Update User</h1>
+    <div class="row">
+
+            <br/><br/>
+            <form method="POST" action="{% url 'update_user' %}">
+                {% csrf_token %}
+
+                {{ user_form.as_p }}
+                <br/><br/>
+                <button type="submit" class="btn btn-secondary">
+                    Update Profile
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+      
+  </div>
+  </div>
+
+  <script>
+      function togglePassword() {
+          var passwordField = document.getElementById("password");
+          var eyeIcon = document.querySelector(".fas.fa-eye");
+          
+          if (passwordField.type === "password") {
+              passwordField.type = "text";
+              eyeIcon.classList.remove("fa-eye");
+              eyeIcon.classList.add("fa-eye-slash");
+          } else {
+              passwordField.type = "password";
+              eyeIcon.classList.remove("fa-eye-slash");
+              eyeIcon.classList.add("fa-eye");
+          }
+      }
+  </script>
+
+    {% endblock %}

@@ -2,12 +2,16 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-
-from base.forms import DeliveryAddressForm
-from .models import Category, CompletedOrder, Customer, DeliveryAddress, Product, ShoppingCart
+import json
+from base.forms import DeliveryAddressForm, UpdateUserForm, UserInfoForm
+from .models import Category, Customer, DeliveryAddress, Product, Profile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum
+from cart.cart import Cart
+from payment.forms import ShippingForm
+from payment.models import ShippingAddress
+
 # Create your views here.
 
 @login_required
@@ -18,7 +22,6 @@ def adminpanel(request):
     
     users = User.objects.select_related('customer').filter(is_superuser=False)
     products = Product.objects.all()
-    shopping_carts = ShoppingCart.objects.select_related('user', 'cart_item', 'user__customer').all()
     
     total_spent = Customer.objects.aggregate(total=Sum('total_spent')).get('total', 0)
     total_users = users.count()
@@ -28,7 +31,6 @@ def adminpanel(request):
         'products': products,
         'total_spent': total_spent,
         'total_users': total_users,
-        'shopping_carts': shopping_carts,
     }
     
     return render(request, 'admin.html', context)
@@ -102,10 +104,8 @@ def profile(request):
         form = DeliveryAddressForm()
 
     # Fetch shopping cart items
-    shopping_cart_items = ShoppingCart.objects.filter(user=user)
 
     context = {
-        'shopping_cart_items': shopping_cart_items,
         'addresses': addresses,
         'form': form,
         'user_name': user.username,
@@ -125,82 +125,6 @@ def set_default_address(request, address_id):
     address.save()
 
     return redirect('profile')  # Redirect back to the profile page
-
-# @login_required
-# def MyCart(request):
-#     user = request.user
-#     shopping_cart_items = ShoppingCart.objects.filter(user=user)
-#     completed_orders = CompletedOrder.objects.filter(user=user)
-
-#     context = {
-#         'shopping_cart_items': shopping_cart_items,
-#         'completed_orders': completed_orders,
-#         'user_name': user.username,
-#     }
-#     return render(request, 'mycart.html', context)
-
-
-# @login_required
-# def complete_order(request, shopping_cart_id):
-#     shopping_cart = get_object_or_404(ShoppingCart, id=shopping_cart_id, user=request.user)
-
-#     # Mark the shopping cart as completed
-#     shopping_cart.cart_status = 3
-#     shopping_cart.save()
-
-#     # Create a new completed order
-#     completed_order = CompletedOrder.objects.create(user=request.user, total_amount=shopping_cart.cart_item_total)
-#     completed_order.cart_items.add(shopping_cart)
-
-#     # Remove items from the shopping cart
-#     shopping_cart.delete()
-
-#     return redirect('my_cart')  # or redirect to any other page
-
-
-
-# @login_required
-# def update_cart_status(request, shopping_cart_id):
-#     shopping_cart = get_object_or_404(ShoppingCart, id=shopping_cart_id)
-
-#     if shopping_cart.user == request.user or request.user.is_superuser:
-#         shopping_cart.cart_status = 3
-#         shopping_cart.save()
-
-#         customer = Customer.objects.get(user=shopping_cart.user)
-#         customer.total_spent += shopping_cart.cart_item_total
-#         customer.save()
-
-#         # Decrease the quantity of the product
-#         product = shopping_cart.cart_item
-#         product.quantity -= shopping_cart.cart_item_quantity
-#         product.save()
-
-#         return redirect('admin')
-#     else:
-#         return JsonResponse({'error': 'You are not authorized to update this cart status.'}, status=403)
-
-
-
-
-
-
-# @login_required
-# def buy(request, shopping_cart_id):
-#     shopping_cart_item = get_object_or_404(ShoppingCart, id=shopping_cart_id, user=request.user)
-#     product = shopping_cart_item.cart_item
-#     shopping_cart_item.cart_status = 2
-#     shopping_cart_item.save()
-
-#     return redirect('profile')
-
-# @login_required
-# def cancel(request, shopping_cart_id):
-#     shopping_cart_item = get_object_or_404(ShoppingCart, id=shopping_cart_id, user=request.user)
-#     product = shopping_cart_item.cart_item
-#     shopping_cart_item.delete()
-
-#     return redirect('profile')
 
 
 def user_logout(request):
@@ -226,6 +150,14 @@ def signin(request):
     if user is not None:
       if not user.is_superuser:
           login(request, user)
+          current_user = Profile.objects.get(user__id=request.user.id)
+          saved_cart = current_user.old_cart
+          if saved_cart:
+             converted_cart = json.loads(saved_cart)
+             cart = Cart(request)
+             for key,value in converted_cart.items():
+                cart.db_add(product=key, quantity=value)
+             
           return redirect('profile')
       else:
           login(request, user)
@@ -233,6 +165,7 @@ def signin(request):
     else:
       messages.error(request, "Invalid username or password. Please try again.", extra_tags='login_error')
       return redirect('login')
+    
   return render(request, 'login.html')
 
 def reciept(request):
@@ -257,9 +190,53 @@ def register(request):
     new_customer.location = location
     new_customer.phone_number = phone_number
     new_customer.save()
-    return redirect ('index')
+    return redirect ('update_info')
   else:
     return render(request, 'register.html')
+  
+
+def update_user(request):
+    if request.user.is_authenticated:
+        current_user = User.objects.get(id=request.user.id)
+        user_form = UpdateUserForm(request.POST or None, instance=current_user)
+
+        if user_form.is_valid():
+            user_form.save()
+            login(request, current_user)
+            messages.success(request, "User has been updated!")
+            return redirect('profile')
+
+        return render(request, 'update_user.html', {'user_form': user_form})  # Fixed syntax error
+
+    else:
+        messages.error(request, "You must be logged in!")
+        return redirect('index')
+    
+def update_info(request):
+    if request.user.is_authenticated:
+        current_user = Profile.objects.get(user=request.user)
+
+        # Use filter().first() to safely get the shipping address
+        shipping_user = ShippingAddress.objects.filter(user=request.user).first()
+
+        # If no shipping address exists yet, you might want to create a blank one:
+        if not shipping_user:
+            shipping_user = ShippingAddress(user=request.user)
+
+        form = UserInfoForm(request.POST or None, instance=current_user)
+        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
+
+        if form.is_valid() or shipping_form.is_valid():
+            form.save()
+            shipping_form.save()
+            messages.success(request, "Your info has been updated!")
+            return redirect('profile')
+
+        return render(request, 'update_info.html', {'form': form, 'shipping_form': shipping_form})
+
+    else:
+        messages.error(request, "You must be logged in!")
+        return redirect('index')
 
 def shop(request):
     categories = Category.objects.prefetch_related('product_set')  # Fetch all categories with their associated products
@@ -268,23 +245,7 @@ def shop(request):
         "categories": categories,
     }
     return render(request, 'shop.html', context)
-# @login_required
-# def add_to_cart(request):
-#     if request.method == 'POST':
-#         product_id = request.POST.get('product_id')
-#         quantity = int(request.POST.get('itemQuantity'))
-#         product = get_object_or_404(Product, pk=product_id)
 
-#         if quantity <= product.quantity:
-#             user = request.user
-#             cart_item = ShoppingCart.objects.create(user=user, cart_item=product, cart_item_quantity=quantity)
-#             cart_item.save()
-#             return redirect('profile')
-#         else:
-#             messages.error(request, 'Total quantity input exceeds the in-stock quantity, please check the in stock quantity and try again.', extra_tags='qtyError')
-#             return redirect('shop')  # Redirect to an appropriate URL or show an error message
-#     else:
-#         return redirect('shop')
     
 
 def utilities_animation(request):

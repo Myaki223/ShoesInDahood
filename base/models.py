@@ -2,7 +2,34 @@ from django.db import models
 from shortuuid.django_fields import ShortUUIDField
 from django.utils.html import mark_safe
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 # Create your models here.
+
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    date_modified = models.DateTimeField(User, auto_now=True)
+    phone = models.CharField(max_length=20, blank=True)
+    address_line1 = models.CharField(max_length=255)
+    address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=255, blank=True)
+    zipcode = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=255, blank=True)
+    old_cart = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
+    
+#Create user profile
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        user_profile = Profile(user=instance)
+        user_profile.save()
+#automate
+post_save.connect(create_profile, sender=User)
+
 
 
 class Customer (models.Model):
@@ -59,30 +86,5 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    cart_item = models.ForeignKey(Product, on_delete=models.CASCADE)
-    cart_status = models.IntegerField(default='1', blank=True)
-    cart_item_quantity = models.IntegerField(blank=True, null=True)
-    cart_item_total = models.IntegerField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.user.username}'s shopping cart"
-
-    def save(self, *args, **kwargs):
-        # Calculate the total price for the item based on its quantity and price
-        self.cart_item_total = self.cart_item_quantity * self.cart_item.price
-        super().save(*args, **kwargs)
-
-class CompletedOrder(models.Model):
-    order_id = ShortUUIDField(unique=True, length=10, max_length=30, prefix="order", alphabet="abcdefgh12345")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    cart_items = models.ManyToManyField(ShoppingCart)
-    total_amount = models.IntegerField(blank=True, null=True)
-    payment_method = models.CharField(max_length=50, default="PayPal")
-    order_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Order {self.order_id} by {self.user.username}"
-    
 

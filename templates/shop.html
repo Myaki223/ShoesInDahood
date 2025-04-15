@@ -26,10 +26,21 @@
                 <h2>{{ product.name }}</h2>
                 <p>{{ product.description }}</p>
                 <p>₱ {{ product.price }}</p>
-                <p>ID: {{ product.id }}</p>
-
+                <div class="row">
+                  <div class="col-md-2">Quantity:</div>
+                  <div class="col-md-2">
+                <select class="form-select form-select-sm" id="qty-cart">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+              </div>
                 {% if user.is_authenticated %}
-                <button type="button" value="{{ product.id }}" class="btn btn-secondary" id="add-cart">Add to Cart</button>
+                <button type="button" value="{{ product.id }}" class="btn btn-secondary add-cart">Add to Cart</button>
+
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-sm btn-primary px-3">Buy Now</a>
             {% endif %}
@@ -44,6 +55,9 @@
       </div>
     </div>
   </div>
-  
-  
+
+
+
+
+
 {% endblock %}

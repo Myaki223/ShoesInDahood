@@ -8,100 +8,170 @@
 <div class="container-img" style="padding-top: 50px;">
     <h1>{{ user.first_name }}'s Cart</h1>
     </div>
-    
+
     <div class="container">
+        {% if cart_products %}
+
         <!-- Active Orders -->
         <h2>Active Orders</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered table-sm m-0">
-                <thead style="background-color: #dc3545; color: white;">
-                    <tr class="text-center">
-                        <th>Product Image</th>
-                        <th>Product Name</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total Amount</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in shopping_cart_items %}
-                    <tr class="text-center align-middle">
-                        <td><img src="{{ item.cart_item.image.url }}" style="max-width: 100px; max-height: 100px;"></td>
-                        <td>{{ item.cart_item.name }}</td>
-                        <td>{{ item.cart_item_quantity }}</td>
-                        <td>₱{{ item.cart_item.price }}</td>
-                        <td>₱{{ item.cart_item_total }}</td>
-                        <td>
-                            {% if item.cart_status == 3 %}
-                                <a href="#" class="text-decoration-none" style="color: rgb(25, 0, 255);">Completed</a>
-                            {% else %}
-                                <a href="#" class="text-decoration-none" style="color: rgb(0, 255, 42);" data-bs-toggle="modal" data-bs-target="#buyModal{{ item.cart_item.id }}">Purchase</a>
-                            {% endif %}
-                        </td>
-                    </tr>
+        <div class="container overflow-hidden text-center">
+            <div class="row gx-5">
+                {% for product in cart_products %}
+                    <div class="col-md-4 mb-3"> <!-- Adjust column size to fit more items per row -->
+                        <div class="card" style="width: 18rem;">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product }}</h5>
+                                <p class="card-text">₱{{ product.price }}</p>
+                                <div class="row">
+                                    <div class="col-md-4">Quantity:</div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="select{{ product.id }}">
+                                            {% for key, value in quantities.items %}
+                                                {% if key == product.id|slugify %}
+                                                    <option selected>{{ value }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" data-index="{{ product.id }}" class="btn btn-secondary update-cart">Update</button>
+                                    <button type="button" data-index="{{ product.id }}" class="btn btn-danger delete-product">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Completed Orders -->
-        <h2>Completed Orders</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered table-sm m-0">
-                <thead style="background-color: #28a745; color: white;">
-                    <tr class="text-center">
-                        <th>Order ID</th>
-                        <th>Total Amount</th>
-                        <th>Payment Method</th>
-                        <th>Order Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in completed_orders %}
-                    <tr class="text-center align-middle">
-                        <td>{{ order.order_id }}</td>
-                        <td>₱{{ order.total_amount }}</td>
-                        <td>{{ order.payment_method }}</td>
-                        <td>{{ order.order_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    <div class="modal fade" id="#buyModal{{ item.cart_item.id }}" tabindex="-1" aria-labelledby="buyModalLabel{{ item.cart_item.id }}" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <h4>Order Details</h4>
-                    <p>Order ID: {{ item.cart_item.id }}</p>
-                    <p>Product: {{ item.cart_item.name }}</p>
-                    <p>Quantity: {{ item.cart_item_quantity }}</p>
-                    <p>Price per Item: ₱{{ item.cart_item.price }}</p>
-                    <p>Total Amount: ₱{{ item.cart_item_total }}</p>
-                    <p>Payment Method: PayPal</p>
-                </div>
-                <div class="modal-footer">
-                    {% if item.id %}
-                        <a href="{% url 'complete_order' shopping_cart_id=item.id %}" class="btn btn-danger">Confirm Purchase</a>
-                    {% else %}
-                        <p>Invalid item ID.</p>
                     {% endif %}
-                </div>
-    
+                    </div>
+                    </div>
+                    </div>
+
+                    <h3>Total:₱ {{ totals }} </h3>
+                    <a href="{% url 'checkout' %}" class="btn btn-success">Check Out</a>
+
+
+
+
+
+
             </div>
         </div>
-    </div>
+        
+
+        </div>
+
+        
 
 
 
 
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+
+    <script>
+    $(document).on('click', '.update-cart', function(e){
+        e.preventDefault();
+    
+        var productid = $(this).data('index');
+        var quantity = $('#select' + productid + ' option:selected').val();
+    
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'cart_update' %}",
+            data: {
+                product_id: productid,
+                product_qty: quantity,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: 'post'
+            }, 
+            success: function(json){ 
+                // Store flag before reload
+                localStorage.setItem("cartUpdated", "true");
+    
+                // Reload the page
+                location.reload();
+            },
+            error: function(xhr, errmsg, err){
+                console.log("Error updating cart:", errmsg);
+            }
+        });
+    });
+    
+    // Show SweetAlert2 after page reload (if update was successful)
+    document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem("cartUpdated")) {
+            Swal.fire({
+                title: "Cart Updated!",
+                text: "Your cart has been successfully updated.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            });
+    
+            // Remove flag after displaying alert
+            localStorage.removeItem("cartUpdated");
+        }
+    });
+    
+    // Delete function with confirmation
+    $(document).on('click', '.delete-product', function(e){
+        e.preventDefault();
+    
+        var productid = $(this).data('index');
+    
+        // SweetAlert2 confirmation
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to undo this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Perform the AJAX request to delete the item
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'cart_delete' %}",
+                    data: {
+                        product_id: productid,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        action: 'post'
+                    }, 
+                    success: function(json){ 
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "The item has been removed from your cart.",
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr, errmsg, err){
+                        console.log("Error deleting product:", errmsg);
+                    }
+                });
+            }
+        });
+    });
+    </script>
+    
 
 {% endblock %}
