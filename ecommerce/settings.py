@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-+&5ih0b8a5v6nc=cx8vfy^on%)$b2=p5knp0r=x)i&c6wxlcil
 DEBUG = True
 
 ALLOWED_HOSTS = ['shoesindahood-production.up.railway.app', 'https://shoesindahood-production.up.railway.app']
-CSRF_TRUSTED_ORIGINS = ['shoesindahood-production.up.railway.app', 'https://shoesindahood-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://shoesindahood-production.up.railway.app']
 
 
 # Application definition
