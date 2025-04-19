@@ -97,13 +97,23 @@
             </a>
     
             <ul class="navbar-list" style="padding-left: 70%;">
-    
+              {% if user.is_authenticated %}
               <li class="navbar-item">
                 <a href="{% url 'index' %}" class="navbar-link">Home</a>
               </li>
               <li class="navbar-item">
                 <a href="{% url 'shop' %}" class="navbar-link">Shop</a>
               </li>
+              
+            {% else %}
+              <li class="navbar-item">
+                <a href="{% url 'index' %}" class="navbar-link">Home</a>
+              </li>
+              <li class="navbar-item">
+                <a href="{% url 'shop' %}" class="navbar-link">Shop</a>
+              </li>
+            {% endif %}
+            
 
 
               <li>

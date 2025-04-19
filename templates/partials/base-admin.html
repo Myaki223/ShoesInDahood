@@ -51,11 +51,28 @@
         <a class="nav-link red-text" href="{% url 'admin' %}">
             <span>My Dashboard</span></a>
     </li>
+    
+      <li class="nav-item">
+        <a class="nav-link red-text" data-bs-toggle="collapse" href="#collapseOne" role="button" aria-expanded="false" aria-controls="collapseOne">
+            Orders
+        </a>
+        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <a class="nav-link red-text" href="{% url 'shipped_dash' %}"><span>Shipped Orders</span></a>
+                <a class="nav-link red-text" href="{% url 'not_shipped_dash' %}"><span>Unshipped Orders</span></a>
+  
+            </div>
+        </div>
+    </li>
+
+
+
     <hr class="sidebar-divider my-0">
     <li class="nav-item active">
         <a class="nav-link red-text" href="{% url 'add_product' %}">
             <span>Add Product</span></a>
     </li>
+    
     
     <hr class="sidebar-divider my-0">
     <li class="nav-item active">
@@ -114,9 +131,9 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="{% static '../static/vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static '../static/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 
     <!-- Core plugin JavaScript-->
     <script src="{% static '../static/vendor/jquery-easing/jquery.easing.min.js' %}"></script>

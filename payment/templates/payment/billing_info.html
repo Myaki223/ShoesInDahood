@@ -59,12 +59,25 @@
           </div>
           <br><br>
 
+
+<br><br> <center>
+
+    <h1>Paypal</h1>
+
+
+{{ paypal_form.render }} </center>
+
+<br><br>
+
+
+
           <div class="card">
             <div class="card-header">
               Billing information
             </div>
             <div class="card-body">
- 
+              <form method="POST" action="{%  url 'process_order' %}">
+                {% csrf_token %}
                 {{ billing_form.as_p }}
 
          
@@ -72,7 +85,8 @@
           </div>
 
 
-          <a href="" class="btn btn-secondary">Pay Now</a>
+          <button type="submit" class="btn btn-secondary">Pay Now</button>
+        </form>
           <br> <br>
 
         </div>
