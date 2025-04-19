@@ -172,9 +172,9 @@ def billing_info (request):
             'no_shipping': '2',
             'invoice': my_Invoice,
             'currency_code': 'PHP',
-            'notify_url': 'http://{}{}'.format(host, reverse("paypal-ipn")),
-            'return_url': 'http://{}{}'.format(host, reverse("payment_success")),
-            'cancel_return': 'http://{}{}'.format(host, reverse("payment_failed")),
+            'notify_url': 'https://{}{}'.format(host, reverse("paypal-ipn")),
+            'return_url': 'https://{}{}'.format(host, reverse("payment_success")),
+            'cancel_return': 'https://{}{}'.format(host, reverse("payment_failed")),
             
             
         }
