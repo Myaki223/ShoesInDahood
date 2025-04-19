@@ -1,20 +1,21 @@
-# Use an official Python runtime as a parent image
+# Use official Python image
 FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set working directory
+# Set work directory
 WORKDIR /app
 
-# Install dependencies
+# Copy dependency files
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
 
-# Copy your project
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the project
 COPY . .
 
-# Run the app (adjust this if you're using something like Gunicorn or Django)
-CMD ["python", "app.py"]
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Run the Django app (update if using different entry point)
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
