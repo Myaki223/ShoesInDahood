@@ -1,13 +1,36 @@
 from django import forms
 from .models import DeliveryAddress, Profile
+from payment.models import ShippingAddress
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 
-class DeliveryAddressForm(forms.ModelForm):
+class ShippingAddressForm(forms.ModelForm):
     class Meta:
-        model = DeliveryAddress
-        fields = ['address_line1', 'address_line2', 'city', 'state', 'postal_code', 'country', 'phone_number', 'is_default']
-
+        model = ShippingAddress
+        fields = [
+            'shipping_full_name',
+            'shipping_email',
+            'shipping_address1',
+            'shipping_address2',
+            'shipping_city',
+            'shipping_state',
+            'shipping_zipcode',
+            'shipping_country',
+            'phone_number',
+            'is_default',
+        ]
+        labels = {
+            'shipping_full_name' : 'Full Name',
+            'shipping_email': 'Email',
+            'shipping_address1': 'Address Line 1',
+            'shipping_address2': 'Address Line 2',
+            'shipping_city': 'City',
+            'shipping_state': 'State/Province',
+            'shipping_zipcode': 'Postal Code',
+            'shipping_country': 'Country',
+            'phone_number': 'Phone Number',
+            'is_default': 'Set as default address',
+        }
 
 class UpdateUserForm(UserChangeForm):
     email = forms.EmailField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))

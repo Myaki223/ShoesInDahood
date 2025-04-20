@@ -127,22 +127,37 @@ def process_order (request):
     else:
         messages.success(request, "Access Denied")
         return redirect('index')
-
-
-def checkout (request):
+    
+def checkout(request):
     cart = Cart(request)
     cart_products = cart.get_prods
     quantities = cart.get_quants
     totals = cart.cart_total()
 
-    if request.user.is_authenticated:
-        shipping_user = ShippingAddress.objects.filter(user=request.user).first()
-        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
-        return render(request, "payment/checkout.html", {"cart_products":cart_products, "quantities":quantities,"totals":totals, "shipping_form":shipping_form})
-    else:
-        shipping_form = ShippingForm(request.POST or None)
-        return render(request, "payment/checkout.html", {"cart_products":cart_products, "quantities":quantities,"totals":totals})
+    shipping_form = ShippingForm(request.POST or None)
 
+    if request.user.is_authenticated:
+        default_address = ShippingAddress.objects.filter(user=request.user, is_default=True).first()
+
+        if default_address and not request.POST:
+            shipping_form = ShippingForm(initial={
+                'shipping_full_name': default_address.shipping_full_name,
+                'shipping_email': default_address.shipping_email,
+                'shipping_address1': default_address.shipping_address1,
+                'shipping_address2': default_address.shipping_address2,
+                'shipping_city': default_address.shipping_city,
+                'shipping_state': default_address.shipping_state,
+                'shipping_zipcode': default_address.shipping_zipcode,
+                'shipping_country': default_address.shipping_country,
+                'phone_number': default_address.phone_number,
+            })
+
+    return render(request, "payment/checkout.html", {
+        "cart_products": cart_products,
+        "quantities": quantities,
+        "totals": totals,
+        "shipping_form": shipping_form,
+    })
 
 
 def billing_info (request):

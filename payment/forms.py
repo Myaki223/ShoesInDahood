@@ -2,20 +2,31 @@ from django import forms
 from .models import ShippingAddress
 
 class ShippingForm(forms.ModelForm):
-    shipping_full_name = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Full Name'}), required=True)
-    shipping_email = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Email'}), required=True)
-    shipping_address1 = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Address1'}), required=True)
-    shipping_address2 = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Address2'}), required=False)
-    shipping_city = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'City'}), required=True)
-    shipping_state = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'State'}), required=False)
-    shipping_zipcode = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Zipcode'}), required=False)
-    shipping_country = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Country'}), required=True)
-
     class Meta:
         model = ShippingAddress
-        fields = ['shipping_full_name','shipping_email','shipping_address1','shipping_address2','shipping_city','shipping_state', 'shipping_zipcode','shipping_country']
+        fields = [
+            'shipping_full_name',
+            'shipping_email',
+            'shipping_address1',
+            'shipping_address2',
+            'shipping_city',
+            'shipping_state',
+            'shipping_zipcode',
+            'shipping_country',
+            'phone_number',
+        ]
 
-        exclude = ['user',]
+        widgets = {
+            'shipping_full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
+            'shipping_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'shipping_address1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address1'}),
+            'shipping_address2': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address2'}),
+            'shipping_city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
+            'shipping_state': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'State'}),
+            'shipping_zipcode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Zipcode'}),
+            'shipping_country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Country'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone'}),
+        }
 
 class PaymentsForm(forms.Form):
     card_name = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Name on Card'}), required=True)

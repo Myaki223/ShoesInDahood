@@ -4,6 +4,7 @@ from base.models import Product
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 import datetime
+from base.models import Profile
 
 # Create your models here.
 
@@ -24,22 +25,35 @@ class Order(models.Model):
     def __str__(self):
         return f'Order - {str(self.id)}'
     
+
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
     shipping_full_name = models.CharField(max_length=255)
     shipping_email = models.CharField(max_length=255)
     shipping_address1 = models.CharField(max_length=255)
     shipping_address2 = models.CharField(max_length=255, null=True, blank=True)
     shipping_city = models.CharField(max_length=255)
     shipping_state = models.CharField(max_length=255, null=True, blank=True)
-    shipping_zipcode  = models.CharField(max_length=255, null=True, blank=True)
-    shipping_country = models.CharField(max_length=255)
+    shipping_zipcode = models.CharField(max_length=255, null=True, blank=True)
+    shipping_country = models.CharField(max_length=255, default="Philippines")
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    is_default = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name_plural = "Shipping Address"
+        verbose_name_plural = "Shipping Addresses"
 
     def __str__(self):
-        return f'Shipping Address -{ str(self.id)}'
+        default_status = "Default" if self.is_default else "Secondary"
+        return f"{self.shipping_address1}, {self.shipping_city} ({default_status})"
+
+    def save(self, *args, **kwargs):
+        # Ensure only one address is marked as default per user
+        if self.is_default and self.user:
+            ShippingAddress.objects.filter(user=self.user, is_default=True).update(is_default=False)
+        super().save(*args, **kwargs)
+
+
     
 @receiver(pre_save, sender=Order)
 def set_shipped_date_on_update(sender, instance,**kwargs):

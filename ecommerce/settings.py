@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-+&5ih0b8a5v6nc=cx8vfy^on%)$b2=p5knp0r=x)i&c6wxlcil
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['shoesindahood-production.up.railway.app', 'https://shoesindahood-production.up.railway.app']
+ALLOWED_HOSTS = ['shoesindahood-production.up.railway.app', 'https://shoesindahood-production.up.railway.app', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = ['https://shoesindahood-production.up.railway.app']
 
 
@@ -89,14 +89,14 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':'railway',
-        'USER':'postgres',
-        'PASSWORD':os.environ['db_password_yo'],
-        'HOST':'caboose.proxy.rlwy.net',
-        'PORT':'22277',        
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        #'ENGINE': 'django.db.backends.postgresql',
+        #'NAME':'railway',
+        #'USER':'postgres',
+        #'PASSWORD':os.environ['db_password_yo'],
+        #'HOST':'caboose.proxy.rlwy.net',
+        #'PORT':'22277',        
     }
 }
 

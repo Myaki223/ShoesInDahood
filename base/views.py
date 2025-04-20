@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 import json
-from base.forms import DeliveryAddressForm, UpdateUserForm, UserInfoForm
+from base.forms import ShippingAddressForm, UpdateUserForm, UserInfoForm
 from .models import Category, Customer, DeliveryAddress, Product, Profile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -87,23 +87,23 @@ def add_product(request):
 @login_required
 def profile(request):
     user = request.user
-    customer = Customer.objects.get(user=user)
-    
-    # Fetch all addresses for the customer
-    addresses = DeliveryAddress.objects.filter(customer=customer)
-    
-    # Handle the address form
+
+    # Fetch all shipping addresses for the logged-in user
+    addresses = ShippingAddress.objects.filter(user=user)
+
+    # Handle form submission
     if request.method == "POST":
-        form = DeliveryAddressForm(request.POST)
+        form = ShippingAddressForm(request.POST)
         if form.is_valid():
             address = form.save(commit=False)
-            address.customer = customer
+            address.user = user
+            if address.is_default:
+                # Ensure only one default address per user
+                ShippingAddress.objects.filter(user=user, is_default=True).update(is_default=False)
             address.save()
-            return redirect('profile')  # Redirect to clear the form
+            return redirect('profile')
     else:
-        form = DeliveryAddressForm()
-
-    # Fetch shopping cart items
+        form = ShippingAddressForm()
 
     context = {
         'addresses': addresses,
@@ -114,17 +114,17 @@ def profile(request):
 
 @login_required
 def set_default_address(request, address_id):
-    # Assuming the Address model uses a customer field, not user
-    address = get_object_or_404(DeliveryAddress, id=address_id, customer__user=request.user)
+    user = request.user
+    address = get_object_or_404(ShippingAddress, id=address_id, user=user)
 
-    # Reset all addresses to not be default
-    DeliveryAddress.objects.filter(customer__user=request.user).update(is_default=False)
+    # Set all other addresses to not default
+    ShippingAddress.objects.filter(user=user, is_default=True).update(is_default=False)
 
-    # Set the selected address as default
+    # Set selected address as default
     address.is_default = True
     address.save()
 
-    return redirect('profile')  # Redirect back to the profile page
+    return redirect('profile')
 
 
 def user_logout(request):
