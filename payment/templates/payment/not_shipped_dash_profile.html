@@ -1,0 +1,42 @@
+{% extends 'partials/base-profile.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-img" style="padding-top: 50px;">
+    <h1>Unshipped Items</h1>
+    <table class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Order</th>
+                <th scope="col">Price</th>
+                <th scope="col">Customer Email</th>
+                <th scope="col">Date Ordered</th>
+                <th scope="col">Shipped Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in orders %}
+            <tr>
+                <td><a href="{% url 'orders' item.id %}">{{ item.id }}</a></td>
+                <td>{{ item.amount_paid }}</td>
+                <td>{{ item.email }}</td>
+                <td>{{ item.date_ordered }}</td>
+                <td>
+                    {% if item.shipped %}
+                        <span class="text-success">Shipped</span>
+                    {% else %}
+                        <span class="text-danger">Not Shipped</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No unshipped orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

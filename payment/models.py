@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from base.models import Product
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 import datetime
+from django.utils import timezone
 from base.models import Profile
 
 # Create your models here.
@@ -24,7 +25,7 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Order - {str(self.id)}'
-    
+
 
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -73,3 +74,33 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'Order Item - {str(self.id)}'
+
+
+class CompletedOrder(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='completed_order')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
+    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    completed_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Completed Order #{self.order.id}"
+
+    class Meta:
+        verbose_name = "Completed Order"
+        verbose_name_plural = "Completed Orders"
+
+@receiver(post_save, sender=Order)
+def create_completed_order(sender, instance, created, **kwargs):
+    if instance.shipped and instance.paid:
+        if not hasattr(instance, 'completed_order'):
+            profile = Profile.objects.filter(user=instance.user).first()
+            shipping_address = instance.user.shippingaddress_set.filter(is_default=True).first() if instance.user else None
+
+            CompletedOrder.objects.create(
+                order=instance,
+                user=instance.user,
+                profile=profile,
+                shipping_address=shipping_address,
+            )

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from cart.cart import Cart
 from payment.forms import ShippingForm, PaymentsForm
-from payment.models import ShippingAddress, Order, OrderItem
+from payment.models import CompletedOrder, ShippingAddress, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages
 from base.models import Product, Profile
@@ -39,23 +39,49 @@ def orders (request, pk):
         messages.success(request, "Access Denied")
         return redirect('index')
 
+def completed_dash(request): 
+    if request.user.is_authenticated and request.user.is_superuser:
+        completed_orders = CompletedOrder.objects.select_related('order', 'user', 'profile').all()
 
-
-def shipped_dash (request): 
+        return render(request, "payment/completed.html", {"completed_orders": completed_orders})
+    else:
+        messages.error(request, "Access Denied")
+        return redirect('index')
+    
+def shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped=True)
-        if request.POST:
-            status = request.POST['shipping_status']
-            num = request.POST['num']
-            order = Order.objects.filter(id=num)
-            now = datetime.datetime.now()
-            order.update(shipped=False)
-           
-            messages.success(request, "Shipping Status Updated")
-            return redirect('admin')
         
-        
-        return render(request, "payment/shipped_dash.html", {"orders":orders})
+        if request.method == "POST":
+            # If marking the order as completed
+            if 'complete_order' in request.POST:
+                order_id = request.POST.get('num')
+                order = Order.objects.filter(id=order_id).first()
+
+                # Check if the order exists and is shipped and paid
+                if order and order.shipped and order.paid:
+                    # Create CompletedOrder entry
+                    profile = Profile.objects.filter(user=order.user).first()
+                    shipping_address = order.user.shippingaddress_set.filter(is_default=True).first()
+                    CompletedOrder.objects.create(
+                        order=order,
+                        user=order.user,
+                        profile=profile,
+                        shipping_address=shipping_address,
+                    )
+                    messages.success(request, "Order has been marked as completed!")
+                    return redirect('admin')
+            
+            # If unmarking an order as shipped
+            elif 'shipping_status' in request.POST:
+                order_id = request.POST.get('num')
+                order = Order.objects.filter(id=order_id)
+                now = datetime.datetime.now()
+                order.update(shipped=False, date_shipped=None)
+                messages.success(request, "Shipping status updated!")
+                return redirect('admin')
+
+        return render(request, "payment/shipped_dash.html", {"orders": orders})
     else:
         messages.success(request, "Access Denied")
         return redirect('index')
@@ -75,6 +101,80 @@ def not_shipped_dash (request):
             messages.success(request, "Shipping Status Updated")
             return redirect('admin')
         return render(request, "payment/not_shipped_dash.html", {"orders":orders})
+    else:
+        messages.success(request, "Access Denied")
+        return redirect('index')
+
+
+def completed_dash_profile(request):
+    if request.user.is_authenticated:
+        # Get completed orders for the logged-in user
+        completed_orders = CompletedOrder.objects.filter(user=request.user).select_related('order', 'user', 'profile')
+        
+        return render(request, "payment/completed_profile.html", {"completed_orders": completed_orders})
+    else:
+        messages.error(request, "Access Denied")
+        return redirect('index')
+
+    
+def shipped_dash_profile(request):
+    if request.user.is_authenticated:
+        # Get orders that are shipped and belong to the logged-in user
+        orders = Order.objects.filter(user=request.user, shipped=True)
+        
+        if request.method == "POST":
+            # If marking the order as completed
+            if 'complete_order' in request.POST:
+                order_id = request.POST.get('num')
+                order = Order.objects.filter(id=order_id, user=request.user).first()
+
+                # Check if the order exists, is shipped, and is paid
+                if order and order.shipped and order.paid:
+                    # Create CompletedOrder entry
+                    profile = Profile.objects.filter(user=order.user).first()
+                    shipping_address = order.user.shippingaddress_set.filter(is_default=True).first()
+                    CompletedOrder.objects.create(
+                        order=order,
+                        user=order.user,
+                        profile=profile,
+                        shipping_address=shipping_address,
+                    )
+                    messages.success(request, "Order has been marked as completed!")
+                    return redirect('index')
+            
+            # If unmarking an order as shipped
+            elif 'shipping_status' in request.POST:
+                order_id = request.POST.get('num')
+                order = Order.objects.filter(id=order_id, user=request.user)
+                now = datetime.datetime.now()
+                order.update(shipped=False, date_shipped=None)
+                messages.success(request, "Shipping status updated!")
+                return redirect('index')
+
+        return render(request, "payment/shipped_dash_profile.html", {"orders": orders})
+    else:
+        messages.success(request, "Access Denied")
+        return redirect('index')
+
+
+
+
+def not_shipped_dash_profile(request):
+    if request.user.is_authenticated:
+        # Get orders that are not shipped and belong to the logged-in user
+        orders = Order.objects.filter(user=request.user, shipped=False)
+        
+        if request.POST:
+            status = request.POST['shipping_status']
+            num = request.POST['num']
+            order = Order.objects.filter(id=num, user=request.user)
+            now = datetime.datetime.now()
+            order.update(shipped=True, date_shipped=now)
+           
+            messages.success(request, "Shipping Status Updated")
+            return redirect('index')
+        
+        return render(request, "payment/not_shipped_dash_profile.html", {"orders": orders})
     else:
         messages.success(request, "Access Denied")
         return redirect('index')
@@ -227,7 +327,7 @@ def billing_info (request):
     else:
         messages.success(request, "Access Denied")
         return redirect('index')
-
+    
 
 
 def payment_success (request):

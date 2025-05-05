@@ -40,8 +40,21 @@
           </div>
       </div>
   </li>
-  
-  
+  <li class="nav-item">
+    <a class="nav-link red-text" data-bs-toggle="collapse" href="#collapseOne" role="button" aria-expanded="false" aria-controls="collapseOne">
+        Orders
+    </a>
+    <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            <a class="nav-link red-text" href="{% url 'shipped_dash_profile' %}"><span>Shipped Orders</span></a>
+            <a class="nav-link red-text" href="{% url 'not_shipped_dash_profile' %}"><span>Orders</span></a>
+            <a class="nav-link red-text" href="{% url 'completed_dash_profile' %}"><span>Completed Orders</span></a>
+
+            
+
+        </div>
+    </div>
+</li>
   
     <hr class="sidebar-divider my-0">
     <li class="nav-item active">
